@@ -1,0 +1,32 @@
+{
+  "name": "Demo Nmap Network Scanner",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-spring-boot-dashboard",
+        "vmware.vscode-spring-boot",
+        "vscjava.vscode-spring-initializr",
+        "redhat.java",
+        "vscjava.vscode-maven"
+      ],
+      "settings": {
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-17",
+            "path": "/usr/local/openjdk-17"
+          }
+        ],
+        "java.home": "/usr/local/openjdk-17"
+      }
+    }
+  },
+  "forwardPorts": [8080],
+  "postCreateCommand": "./mvnw clean install -DskipTests",
+  "remoteUser": "vscode",
+  "features": {}
+}
