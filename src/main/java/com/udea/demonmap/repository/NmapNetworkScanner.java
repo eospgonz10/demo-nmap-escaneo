@@ -166,18 +166,27 @@ public class NmapNetworkScanner implements NetworkScanner {
         }
         
         // Leer errores si los hay
+        StringBuilder errorOutput = new StringBuilder();
         try (BufferedReader errorReader = new BufferedReader(
                 new InputStreamReader(process.getErrorStream()))) {
             
             String errorLine;
             while ((errorLine = errorReader.readLine()) != null) {
                 log.warn("nmap error: {}", errorLine);
+                errorOutput.append(errorLine).append("\n");
             }
         }
         
         int exitCode = process.waitFor();
         if (exitCode != 0) {
-            throw new Exception("Comando nmap falló con código de salida: " + exitCode);
+            String errorMsg = errorOutput.toString();
+            if (errorMsg.contains("no se reconoce") || errorMsg.contains("not recognized") || 
+                errorMsg.contains("command not found") || errorMsg.contains("No such file")) {
+                throw new Exception("nmap no está instalado o no está en el PATH del sistema. " +
+                    "Por favor instale nmap desde https://nmap.org/download.html y reinicie su terminal/IDE.");
+            }
+            throw new Exception("Comando nmap falló con código de salida: " + exitCode + 
+                ". Error: " + errorMsg);
         }
         
         return output;

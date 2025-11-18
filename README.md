@@ -129,17 +129,29 @@ cd demo-nmap-escaneo
 
 2. **Instalar nmap:**
 
+**Ubuntu/Debian:**
 ```bash
-# En Ubuntu/Debian
 sudo apt-get update
 sudo apt-get install nmap
-
-# En macOS
-brew install nmap
-
-# En Windows
-# Descargar de https://nmap.org/download.html
 ```
+
+**macOS:**
+```bash
+brew install nmap
+```
+
+**Windows:**
+1. Descarga el instalador desde: https://nmap.org/download.html
+2. Ejecuta el instalador y **marca la opción** "Add Nmap to the system PATH"
+3. **Importante:** Reinicia tu terminal o IDE después de instalar
+4. Verifica la instalación:
+```bash
+nmap --version
+```
+
+Si nmap no es reconocido después de instalarlo:
+- Agrega manualmente al PATH: `C:\Program Files (x86)\Nmap` 
+- O reinicia Windows completamente
 
 3. **Compilar y ejecutar:**
 
