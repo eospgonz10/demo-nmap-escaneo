@@ -77,16 +77,18 @@ public class NetworkScanController {
     public ResponseEntity<ScanResultDTO> scanNetwork(
             @Parameter(description = "Rango de red en notación CIDR (ej: 192.168.1.0/24). Si no se proporciona, se detecta automáticamente.", example = "192.168.1.0/24")
             @RequestParam(required = false) 
-            @Pattern(regexp = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/(3[0-2]|[12]?[0-9])$", 
-                    message = "Formato de red CIDR inválido")
             String networkRange,
             
             @Parameter(description = "Tipo de escaneo: 'quick' (solo dispositivos activos) o 'full' (con puertos)", example = "full")
             @RequestParam(defaultValue = "quick")
-            @Pattern(regexp = "^(quick|full)$", message = "El tipo debe ser 'quick' o 'full'")
             String scanType
     ) {
         try {
+            // Validar tipo de escaneo
+            if (!"quick".equalsIgnoreCase(scanType) && !"full".equalsIgnoreCase(scanType)) {
+                throw new IllegalArgumentException("El tipo debe ser 'quick' o 'full'");
+            }
+            
             // Detectar red si no se proporciona
             if (networkRange == null || networkRange.isEmpty()) {
                 networkRange = networkScanService.detectLocalNetwork();

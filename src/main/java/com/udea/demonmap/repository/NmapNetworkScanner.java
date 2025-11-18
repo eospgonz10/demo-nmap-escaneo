@@ -136,12 +136,22 @@ public class NmapNetworkScanner implements NetworkScanner {
     
     /**
      * Ejecuta un comando del sistema y retorna la salida.
+     * Compatible con Windows, Linux y macOS.
      */
     private List<String> executeCommand(String command) throws Exception {
         List<String> output = new ArrayList<>();
         
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("sh", "-c", command);
+        
+        // Detectar sistema operativo y configurar comando apropiado
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            // Windows: usar cmd.exe
+            processBuilder.command("cmd.exe", "/c", command);
+        } else {
+            // Linux/Mac: usar sh
+            processBuilder.command("sh", "-c", command);
+        }
         
         Process process = processBuilder.start();
         

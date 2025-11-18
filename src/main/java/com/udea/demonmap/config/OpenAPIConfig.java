@@ -48,5 +48,4 @@ public class OpenAPIConfig {
                 .info(info)
                 .servers(List.of(productionServer, localServer));
     }
-    }
 }
