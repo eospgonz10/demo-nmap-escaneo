@@ -15,9 +15,10 @@ import java.util.Map;
 /**
  * Manejador global de excepciones para la aplicación.
  * Centraliza el manejo de errores y proporciona respuestas consistentes.
+ * TEMPORALMENTE DESHABILITADO por incompatibilidad con springdoc-openapi
  */
 @Slf4j
-@RestControllerAdvice
+//@RestControllerAdvice  // Comentado temporalmente
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
