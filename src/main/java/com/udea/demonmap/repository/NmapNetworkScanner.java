@@ -153,40 +153,35 @@ public class NmapNetworkScanner implements NetworkScanner {
             processBuilder.command("sh", "-c", command);
         }
         
+        // Redirigir stderr a stdout para capturar toda la salida
+        processBuilder.redirectErrorStream(true);
+        
         Process process = processBuilder.start();
         
+        // Leer toda la salida (stdout + stderr combinados)
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream()))) {
             
             String line;
             while ((line = reader.readLine()) != null) {
                 output.add(line);
-                log.trace("nmap output: {}", line);
-            }
-        }
-        
-        // Leer errores si los hay
-        StringBuilder errorOutput = new StringBuilder();
-        try (BufferedReader errorReader = new BufferedReader(
-                new InputStreamReader(process.getErrorStream()))) {
-            
-            String errorLine;
-            while ((errorLine = errorReader.readLine()) != null) {
-                log.warn("nmap error: {}", errorLine);
-                errorOutput.append(errorLine).append("\n");
+                log.debug("nmap: {}", line);
             }
         }
         
         int exitCode = process.waitFor();
+        
+        log.debug("Comando nmap completado con código: {}. Líneas de salida: {}", exitCode, output.size());
+        
         if (exitCode != 0) {
-            String errorMsg = errorOutput.toString();
-            if (errorMsg.contains("no se reconoce") || errorMsg.contains("not recognized") || 
-                errorMsg.contains("command not found") || errorMsg.contains("No such file")) {
+            // Buscar si el error indica que nmap no está instalado
+            String allOutput = String.join("\n", output);
+            if (allOutput.contains("no se reconoce") || allOutput.contains("not recognized") || 
+                allOutput.contains("command not found") || allOutput.contains("No such file")) {
                 throw new Exception("nmap no está instalado o no está en el PATH del sistema. " +
                     "Por favor instale nmap desde https://nmap.org/download.html y reinicie su terminal/IDE.");
             }
-            throw new Exception("Comando nmap falló con código de salida: " + exitCode + 
-                ". Error: " + errorMsg);
+            throw new Exception("Comando nmap falló con código de salida: " + exitCode);
         }
         
         return output;
@@ -198,16 +193,27 @@ public class NmapNetworkScanner implements NetworkScanner {
     private List<String> parseActiveHosts(List<String> output) {
         List<String> activeIps = new ArrayList<>();
         
+        log.debug("Parseando {} líneas de salida de nmap", output.size());
+        
         for (String line : output) {
-            Matcher matcher = IP_PATTERN.matcher(line);
-            if (matcher.find()) {
-                String ip = matcher.group(2);
-                if (ip != null && !ip.isEmpty()) {
-                    activeIps.add(ip);
+            log.trace("Procesando línea: {}", line);
+            
+            // Buscar patrones de IP en diferentes formatos
+            // Formato: "Nmap scan report for 192.168.1.1"
+            // Formato: "Host is up (0.0010s latency)."
+            if (line.contains("Nmap scan report for")) {
+                Matcher matcher = IP_PATTERN.matcher(line);
+                if (matcher.find()) {
+                    String ip = matcher.group(2);
+                    if (ip != null && !ip.isEmpty()) {
+                        activeIps.add(ip);
+                        log.debug("IP activa encontrada: {}", ip);
+                    }
                 }
             }
         }
         
+        log.info("Total de IPs activas parseadas: {}", activeIps.size());
         return activeIps;
     }
     
