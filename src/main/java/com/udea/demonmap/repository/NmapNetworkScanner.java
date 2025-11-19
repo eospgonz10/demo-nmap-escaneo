@@ -27,8 +27,9 @@ public class NmapNetworkScanner implements NetworkScanner {
     private static final int COMMAND_TIMEOUT_SECONDS = 300; // 5 minutos
     
     // Patrones regex para parsear salida de nmap
-    private static final Pattern IP_PATTERN = Pattern.compile("Nmap scan report for ([\\w.-]+)? ?\\(?([0-9.]+)\\)?");
-    private static final Pattern MAC_PATTERN = Pattern.compile("MAC Address: ([0-9A-F:]+) \\(([^)]+)\\)");
+    // Mejorado para capturar IPs en diferentes formatos de salida de nmap
+    private static final Pattern IP_PATTERN = Pattern.compile("Nmap scan report for (?:([\\w.-]+) )?\\(?([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)\\)?");
+    private static final Pattern MAC_PATTERN = Pattern.compile("MAC Address: ([0-9A-Fa-f:]+) \\(([^)]+)\\)");
     private static final Pattern PORT_PATTERN = Pattern.compile("(\\d+)/(tcp|udp)\\s+(open|closed|filtered)\\s+([\\w-]+)(?:\\s+(.+))?");
     private static final Pattern OS_PATTERN = Pattern.compile("OS details: (.+)");
     private static final Pattern HOST_UP_PATTERN = Pattern.compile("Host is up");
@@ -51,17 +52,18 @@ public class NmapNetworkScanner implements NetworkScanner {
             String command = String.format("%s -sn -PR %s", NMAP_COMMAND, networkRange);
             
             log.debug("Ejecutando comando: {}", command);
-            List<String> activeIps = executeCommand(command);
+            List<String> output = executeCommand(command);
             
-            // Parsear IPs activas
-            List<String> ips = parseActiveHosts(activeIps);
-            result.setTotalHostsScanned(ips.size());
+            // Parsear hosts activos con información básica
+            List<NetworkDevice> devices = parseQuickScanDevices(output);
+            result.setDevices(devices);
+            result.setTotalHostsScanned(devices.size());
             
-            log.info("Hosts activos encontrados: {}", ips.size());
+            log.info("Hosts activos encontrados: {}", devices.size());
             
             result.setScanEndTime(LocalDateTime.now());
             result.calculateDuration();
-            result.setActiveHostsFound(ips.size());
+            result.setActiveHostsFound(devices.size());
             result.setStatus(ScanResult.ScanStatus.SUCCESS);
             
             return result;
@@ -215,6 +217,80 @@ public class NmapNetworkScanner implements NetworkScanner {
         
         log.info("Total de IPs activas parseadas: {}", activeIps.size());
         return activeIps;
+    }
+    
+    /**
+     * Parsea la salida de nmap -sn para extraer dispositivos con información básica (IP, MAC, vendor).
+     */
+    private List<NetworkDevice> parseQuickScanDevices(List<String> output) {
+        List<NetworkDevice> devices = new ArrayList<>();
+        
+        log.debug("Parseando {} líneas de salida de nmap para dispositivos básicos", output.size());
+        
+        String currentIp = null;
+        String currentHostname = null;
+        
+        for (String line : output) {
+            log.trace("Procesando línea: {}", line);
+            
+            // Extraer IP y hostname
+            // Formato: "Nmap scan report for router.local (192.168.1.1)"
+            // Formato: "Nmap scan report for 192.168.1.1"
+            if (line.contains("Nmap scan report for")) {
+                Matcher matcher = IP_PATTERN.matcher(line);
+                if (matcher.find()) {
+                    String hostname = matcher.group(1);
+                    String ip = matcher.group(2);
+                    
+                    if (ip != null && !ip.isEmpty()) {
+                        currentIp = ip;
+                        currentHostname = (hostname != null && !hostname.isEmpty()) ? hostname : null;
+                        log.debug("Dispositivo encontrado - IP: {}, Hostname: {}", currentIp, currentHostname);
+                    }
+                }
+            }
+            // Extraer MAC y vendor
+            // Formato: "MAC Address: AA:BB:CC:DD:EE:FF (Vendor Name)"
+            else if (line.contains("MAC Address:") && currentIp != null) {
+                Matcher macMatcher = MAC_PATTERN.matcher(line);
+                if (macMatcher.find()) {
+                    String mac = macMatcher.group(1);
+                    String vendor = macMatcher.group(2);
+                    
+                    // Crear dispositivo con la información disponible
+                    NetworkDevice device = NetworkDevice.builder()
+                            .ipAddress(currentIp)
+                            .hostname(currentHostname)
+                            .macAddress(mac)
+                            .vendor(vendor)
+                            .status("up")
+                            .openPorts(new ArrayList<>()) // No ports en quick scan
+                            .build();
+                    
+                    devices.add(device);
+                    log.debug("Dispositivo agregado: IP={}, MAC={}, Vendor={}", currentIp, mac, vendor);
+                    
+                    // Reset para el siguiente host
+                    currentIp = null;
+                    currentHostname = null;
+                }
+            }
+        }
+        
+        // Si quedan IPs sin MAC (localhost u otros casos), agregarlos sin MAC
+        if (currentIp != null) {
+            NetworkDevice device = NetworkDevice.builder()
+                    .ipAddress(currentIp)
+                    .hostname(currentHostname)
+                    .status("up")
+                    .openPorts(new ArrayList<>())
+                    .build();
+            devices.add(device);
+            log.debug("Dispositivo agregado sin MAC: IP={}, Hostname={}", currentIp, currentHostname);
+        }
+        
+        log.info("Total de dispositivos básicos parseados: {}", devices.size());
+        return devices;
     }
     
     /**
