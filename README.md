@@ -15,14 +15,9 @@ Aplicación Spring Boot que implementa un escáner de red concurrente usando **n
 ### 🎯 Características Principales
 
 - ✅ **Escaneo de red completo** con detección de dispositivos y puertos
-- ✅ **Procesamiento concurrente** usando ExecutorService para múltiples hosts
 - ✅ **API RESTful** documentada con Swagger/OpenAPI
 - ✅ **Arquitectura por capas** (Controller, Service, Repository, Entity, DTO)
-- ✅ **Principios SOLID** aplicados en toda la arquitectura
-- ✅ **Clean Code** con documentación clara y código autodescriptivo
 - ✅ **Validación de datos** con Bean Validation
-- ✅ **Manejo de errores** centralizado con GlobalExceptionHandler
-- ✅ **Dev Container** configurado para Codespaces/Docker
 
 ---
 
@@ -55,35 +50,6 @@ src/main/java/com/udea/demonmap/
 └── DemonmapApplication.java   # Aplicación principal
 ```
 
-### 🎨 Principios SOLID Aplicados
-
-#### **S - Single Responsibility Principle (SRP)**
-- Cada clase tiene una única responsabilidad
-- `NetworkDevice`: Representa un dispositivo de red
-- `NmapNetworkScanner`: Ejecuta comandos nmap
-- `NetworkScanServiceImpl`: Coordina escaneos con concurrencia
-- `NetworkScanController`: Maneja peticiones HTTP
-
-#### **O - Open/Closed Principle (OCP)**
-- Clases abiertas a extensión, cerradas a modificación
-- Se pueden agregar nuevos tipos de escaners sin modificar el servicio
-
-#### **L - Liskov Substitution Principle (LSP)**
-- Las implementaciones pueden sustituirse por sus abstracciones
-- `NmapNetworkScanner` puede ser reemplazado por otra implementación de `NetworkScanner`
-
-#### **I - Interface Segregation Principle (ISP)**
-- Interfaces específicas y cohesivas
-- `NetworkScanner` define solo operaciones de escaneo
-- `NetworkScanService` define solo operaciones de alto nivel
-
-#### **D - Dependency Inversion Principle (DIP)**
-- Módulos de alto nivel dependen de abstracciones
-- `NetworkScanServiceImpl` depende de `NetworkScanner` (interface)
-- Inyección de dependencias mediante constructor
-
----
-
 ## 🚀 Requisitos Previos
 
 ### Para ejecución local:
@@ -102,7 +68,7 @@ src/main/java/com/udea/demonmap/
 
 ## 📦 Instalación y Ejecución
 
-### Opción 1: GitHub Codespaces (Recomendado)
+### Opción 1: GitHub Codespaces
 
 1. Abre el repositorio en GitHub
 2. Haz clic en **Code > Codespaces > Create codespace on main**
@@ -274,36 +240,6 @@ El servicio implementa **procesamiento concurrente** para mejorar el rendimiento
 - **ExecutorService** con pool de 10 threads
 - Escaneo paralelo de múltiples hosts
 - Timeout de 60 segundos por host
-- Manejo robusto de errores en threads individuales
-
-**Ejemplo de mejora:**
-- Escaneo secuencial de 50 hosts: ~500 segundos
-- Escaneo concurrente de 50 hosts: ~60 segundos
-- **Mejora: 8x más rápido** ⚡
-
----
-
-## 📚 Patrones de Diseño Aplicados
-
-### **1. Dependency Injection (DI)**
-- Uso de inyección por constructor con `@RequiredArgsConstructor`
-- Facilita testing y desacoplamiento
-
-### **2. Strategy Pattern**
-- `NetworkScanner` como estrategia para diferentes tipos de escaneo
-- Permite cambiar implementaciones sin modificar servicios
-
-### **3. Builder Pattern**
-- Construcción fluida de objetos complejos (Entity y DTO)
-- Uso de `@Builder` de Lombok
-
-### **4. DTO Pattern**
-- Separación entre entidades de dominio y objetos de transferencia
-- Control sobre lo que se expone en la API
-
-### **5. Repository Pattern**
-- `NetworkScanner` como repositorio de datos de red
-- Abstracción del acceso a nmap
 
 ---
 
@@ -313,7 +249,6 @@ El servicio implementa **procesamiento concurrente** para mejorar el rendimiento
 
 - ✅ Solo escanea redes locales
 - ⚠️ Requiere permisos de administrador para algunos escaneos
-- 🔒 No implementa autenticación (en producción, agregar JWT/OAuth2)
 - 📝 Registra todas las operaciones para auditoría
 - ⛔ No realizar escaneos en redes públicas o sin autorización
 
@@ -354,7 +289,6 @@ http://localhost:8080/doc/swagger-ui.html
 
 **Demo Nmap Project**  
 Universidad de Antioquia  
-Demostración de concurrencia, SOLID y Clean Code
 
 ---
 
