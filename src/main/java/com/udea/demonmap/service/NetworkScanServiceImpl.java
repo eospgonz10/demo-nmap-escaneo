@@ -5,7 +5,6 @@ import com.udea.demonmap.entity.NetworkDevice;
 import com.udea.demonmap.entity.ScanResult;
 import com.udea.demonmap.repository.NetworkScanner;
 import com.udea.demonmap.repository.ScanException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -16,21 +15,11 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 /**
  * Implementación del servicio de escaneo de red con concurrencia.
- * 
- * Aplica varios principios SOLID:
- * - SRP: Única responsabilidad - coordinar escaneos de red
- * - DIP: Depende de abstracciones (NetworkScanner interface)
- * - OCP: Abierto a extensión, cerrado a modificación
- * 
+ *
  * Usa ExecutorService para procesamiento concurrente de múltiples hosts.
- * 
- * 🎯 CONFIGURACIÓN DINÁMICA:
- * Los parámetros de rendimiento se leen desde application.properties
- * permitiendo ajustes sin recompilar la aplicación.
  */
 @Slf4j
 @Service
@@ -49,14 +38,13 @@ public class NetworkScanServiceImpl implements NetworkScanService {
     public NetworkScanServiceImpl(NetworkScanner networkScanner, NetworkScanConfig scanConfig) {
         this.networkScanner = networkScanner;
         this.scanConfig = scanConfig;
-        
-        // ⚡ POOL DE THREADS CONFIGURABLE desde application.properties
-        // Propiedad: network.scan.thread-pool-size
+
+        // Pool threads - Propiedad: network.scan.thread-pool-size
         this.executorService = Executors.newFixedThreadPool(scanConfig.getThreadPoolSize());
         
-        log.info("🚀 NetworkScanService inicializado con {} threads", scanConfig.getThreadPoolSize());
-        log.info("⏱️  Timeout por host: {} segundos", scanConfig.getHostTimeoutSeconds());
-        log.info("🔍 Puertos a escanear: top {}", scanConfig.getTopPorts());
+        log.info("NetworkScanService inicializado con {} threads", scanConfig.getThreadPoolSize());
+        log.info("Timeout por host: {} segundos", scanConfig.getHostTimeoutSeconds());
+        log.info("Puertos a escanear: top {}", scanConfig.getTopPorts());
     }
     
     @Override
@@ -128,20 +116,6 @@ public class NetworkScanServiceImpl implements NetworkScanService {
     public ScanResult performQuickScan(String networkRange) throws ScanException {
         log.info("Iniciando escaneo rápido de red: {}", networkRange);
         return networkScanner.scanNetwork(networkRange);
-    }
-    
-    @Override
-    public CompletableFuture<List<NetworkDevice>> scanHostsAsync(List<String> ipAddresses) {
-        log.info("Iniciando escaneo asíncrono de {} hosts", ipAddresses.size());
-        
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return scanHostsConcurrently(ipAddresses);
-            } catch (Exception e) {
-                log.error("Error en escaneo asíncrono: {}", e.getMessage(), e);
-                throw new CompletionException(e);
-            }
-        }, executorService);
     }
     
     @Override
@@ -237,21 +211,5 @@ public class NetworkScanServiceImpl implements NetworkScanService {
         
         log.debug("Escaneo concurrente completado. Dispositivos válidos: {}", devices.size());
         return devices;
-    }
-    
-    /**
-     * Método para liberar recursos al cerrar la aplicación.
-     */
-    public void shutdown() {
-        log.info("Cerrando ExecutorService...");
-        executorService.shutdown();
-        try {
-            if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
-                executorService.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            executorService.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
     }
 }

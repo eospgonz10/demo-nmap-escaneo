@@ -14,8 +14,7 @@ public interface NetworkScanService {
     
     /**
      * Realiza un escaneo completo de la red con detección de dispositivos y puertos.
-     * Usa concurrencia para mejorar el rendimiento.
-     * 
+     *
      * @param networkRange Rango de red en notación CIDR (ej: 192.168.1.0/24)
      * @return ScanResult con todos los dispositivos y sus puertos
      * @throws ScanException si hay un error durante el escaneo
@@ -30,15 +29,7 @@ public interface NetworkScanService {
      * @throws ScanException si hay un error durante el escaneo
      */
     ScanResult performQuickScan(String networkRange) throws ScanException;
-    
-    /**
-     * Escanea de forma asíncrona múltiples hosts en paralelo.
-     * 
-     * @param ipAddresses Lista de direcciones IP a escanear
-     * @return CompletableFuture con la lista de dispositivos escaneados
-     */
-    CompletableFuture<List<NetworkDevice>> scanHostsAsync(List<String> ipAddresses);
-    
+
     /**
      * Escanea un host específico.
      * 

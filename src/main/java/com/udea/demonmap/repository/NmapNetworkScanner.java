@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 public class NmapNetworkScanner implements NetworkScanner {
     
     private static final String NMAP_COMMAND = "nmap";
-    private static final int COMMAND_TIMEOUT_SECONDS = 300; // 5 minutos
     
     private final NetworkScanConfig scanConfig;
     
@@ -34,7 +33,7 @@ public class NmapNetworkScanner implements NetworkScanner {
      */
     public NmapNetworkScanner(NetworkScanConfig scanConfig) {
         this.scanConfig = scanConfig;
-        log.info("🔍 NmapNetworkScanner configurado para escanear top {} puertos", 
+        log.info("NmapNetworkScanner configurado para escanear top {} puertos",
                 scanConfig.getTopPorts());
     }
     

@@ -2,7 +2,6 @@ package com.udea.demonmap.controller;
 
 import com.udea.demonmap.dto.NetworkDeviceDTO;
 import com.udea.demonmap.dto.PortDTO;
-import com.udea.demonmap.dto.ScanRequestDTO;
 import com.udea.demonmap.dto.ScanResultDTO;
 import com.udea.demonmap.entity.NetworkDevice;
 import com.udea.demonmap.entity.Port;
@@ -16,7 +15,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
