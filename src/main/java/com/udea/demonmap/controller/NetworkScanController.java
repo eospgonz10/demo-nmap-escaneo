@@ -32,16 +32,6 @@ import java.util.stream.Collectors;
 
 /**
  * Controlador REST para operaciones de escaneo de red.
- * 
- * Expone endpoints documentados con Swagger para:
- * - Escaneo completo de red con detección de dispositivos y puertos
- * - Escaneo rápido (solo dispositivos activos)
- * - Escaneo de host individual
- * - Detección automática de red local
- * 
- * Aplica principios SOLID:
- * - SRP: Única responsabilidad - manejar peticiones HTTP de escaneo
- * - DIP: Depende de abstracción (NetworkScanService interface)
  */
 @Slf4j
 @RestController
@@ -194,9 +184,7 @@ public class NetworkScanController {
         health.put("message", "Servicio de escaneo de red operativo");
         return ResponseEntity.ok(health);
     }
-    
-    // Métodos de conversión Entity -> DTO
-    
+        
     private ScanResultDTO toDTO(ScanResult result) {
         return ScanResultDTO.builder()
                 .networkRange(result.getNetworkRange())

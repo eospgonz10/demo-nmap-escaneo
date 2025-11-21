@@ -9,8 +9,6 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Interfaz del servicio de escaneo de red.
- * Define las operaciones de alto nivel para el escaneo de redes.
- * Aplica el principio de Inversión de Dependencias (DIP).
  */
 public interface NetworkScanService {
     

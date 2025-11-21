@@ -1,5 +1,6 @@
 package com.udea.demonmap.repository;
 
+import com.udea.demonmap.config.NetworkScanConfig;
 import com.udea.demonmap.entity.NetworkDevice;
 import com.udea.demonmap.entity.Port;
 import com.udea.demonmap.entity.ScanResult;
@@ -16,8 +17,6 @@ import java.util.regex.Pattern;
 
 /**
  * Implementación del escáner de red usando nmap.
- * Aplica el principio SRP (Single Responsibility Principle):
- * - Única responsabilidad: ejecutar comandos nmap y parsear resultados.
  */
 @Slf4j
 @Repository
@@ -26,8 +25,20 @@ public class NmapNetworkScanner implements NetworkScanner {
     private static final String NMAP_COMMAND = "nmap";
     private static final int COMMAND_TIMEOUT_SECONDS = 300; // 5 minutos
     
+    private final NetworkScanConfig scanConfig;
+    
+    /**
+     * Constructor con inyección de configuración.
+     * 
+     * @param scanConfig Configuración desde application.properties
+     */
+    public NmapNetworkScanner(NetworkScanConfig scanConfig) {
+        this.scanConfig = scanConfig;
+        log.info("🔍 NmapNetworkScanner configurado para escanear top {} puertos", 
+                scanConfig.getTopPorts());
+    }
+    
     // Patrones regex para parsear salida de nmap
-    // Mejorado para capturar IPs en diferentes formatos de salida de nmap
     private static final Pattern IP_PATTERN = Pattern.compile("Nmap scan report for (?:([\\w.-]+) )?\\(?([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)\\)?");
     private static final Pattern MAC_PATTERN = Pattern.compile("MAC Address: ([0-9A-Fa-f:]+) \\(([^)]+)\\)");
     private static final Pattern PORT_PATTERN = Pattern.compile("(\\d+)/(tcp|udp)\\s+(open|closed|filtered)\\s+([\\w-]+)(?:\\s+(.+))?");
@@ -47,8 +58,6 @@ public class NmapNetworkScanner implements NetworkScanner {
         
         try {
             // Comando nmap para escaneo rápido de red
-            // -sn: Ping scan (no escanea puertos)
-            // -PR: ARP ping
             String command = String.format("%s -sn -PR %s", NMAP_COMMAND, networkRange);
             
             log.debug("Ejecutando comando: {}", command);
@@ -83,11 +92,9 @@ public class NmapNetworkScanner implements NetworkScanner {
         log.info("Escaneando host: {}", ipAddress);
         
         try {
-            // Comando nmap para escaneo detallado de un host
-            // -sV: Detección de versión de servicios
-            // -O: Detección de OS
-            // --top-ports 100: Escanea los 100 puertos más comunes
-            String command = String.format("%s -sV --top-ports 100 %s", NMAP_COMMAND, ipAddress);
+            // Comando configuración dinámica
+            String command = String.format("%s -sS --top-ports %d -T4 --host-timeout 20s --min-rate 100 %s", 
+                    NMAP_COMMAND, scanConfig.getTopPorts(), ipAddress);
             
             log.debug("Ejecutando comando: {}", command);
             List<String> output = executeCommand(command);

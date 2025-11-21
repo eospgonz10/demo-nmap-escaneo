@@ -1,5 +1,6 @@
 package com.udea.demonmap.service;
 
+import com.udea.demonmap.config.NetworkScanConfig;
 import com.udea.demonmap.entity.NetworkDevice;
 import com.udea.demonmap.entity.ScanResult;
 import com.udea.demonmap.repository.NetworkScanner;
@@ -26,17 +27,37 @@ import java.util.stream.Collectors;
  * - OCP: Abierto a extensión, cerrado a modificación
  * 
  * Usa ExecutorService para procesamiento concurrente de múltiples hosts.
+ * 
+ * 🎯 CONFIGURACIÓN DINÁMICA:
+ * Los parámetros de rendimiento se leen desde application.properties
+ * permitiendo ajustes sin recompilar la aplicación.
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class NetworkScanServiceImpl implements NetworkScanService {
     
     private final NetworkScanner networkScanner;
+    private final NetworkScanConfig scanConfig;
+    private final ExecutorService executorService;
     
-    // Pool de threads para procesamiento concurrente
-    private static final int THREAD_POOL_SIZE = 10;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+    /**
+     * Constructor con inyección de dependencias.
+     * 
+     * @param networkScanner Implementación del escáner (NmapNetworkScanner)
+     * @param scanConfig Configuración desde application.properties
+     */
+    public NetworkScanServiceImpl(NetworkScanner networkScanner, NetworkScanConfig scanConfig) {
+        this.networkScanner = networkScanner;
+        this.scanConfig = scanConfig;
+        
+        // ⚡ POOL DE THREADS CONFIGURABLE desde application.properties
+        // Propiedad: network.scan.thread-pool-size
+        this.executorService = Executors.newFixedThreadPool(scanConfig.getThreadPoolSize());
+        
+        log.info("🚀 NetworkScanService inicializado con {} threads", scanConfig.getThreadPoolSize());
+        log.info("⏱️  Timeout por host: {} segundos", scanConfig.getHostTimeoutSeconds());
+        log.info("🔍 Puertos a escanear: top {}", scanConfig.getTopPorts());
+    }
     
     @Override
     public ScanResult performFullNetworkScan(String networkRange) throws ScanException {
@@ -176,7 +197,7 @@ public class NetworkScanServiceImpl implements NetworkScanService {
      */
     private List<NetworkDevice> scanHostsConcurrently(List<String> ipAddresses) {
         log.debug("Escaneando {} hosts concurrentemente con pool de {} threads", 
-                ipAddresses.size(), THREAD_POOL_SIZE);
+                ipAddresses.size(), scanConfig.getThreadPoolSize());
         
         List<Future<NetworkDevice>> futures = new ArrayList<>();
         
@@ -203,7 +224,9 @@ public class NetworkScanServiceImpl implements NetworkScanService {
         List<NetworkDevice> devices = new ArrayList<>();
         for (Future<NetworkDevice> future : futures) {
             try {
-                NetworkDevice device = future.get(60, TimeUnit.SECONDS); // Timeout de 60s por host
+                // ⚡ TIMEOUT CONFIGURABLE desde application.properties
+                // Propiedad: network.scan.host-timeout-seconds
+                NetworkDevice device = future.get(scanConfig.getHostTimeoutSeconds(), TimeUnit.SECONDS);
                 if (device != null && !"error".equals(device.getStatus())) {
                     devices.add(device);
                 }

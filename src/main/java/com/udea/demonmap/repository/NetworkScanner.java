@@ -7,12 +7,6 @@ import java.util.List;
 
 /**
  * Interfaz para el escaneo de red.
- * Aplica el principio de Inversión de Dependencias (DIP):
- * - Los módulos de alto nivel no dependen de módulos de bajo nivel.
- * - Ambos dependen de abstracciones (esta interfaz).
- * 
- * También aplica el principio de Segregación de Interfaces (ISP):
- * - Clientes no deberían depender de interfaces que no usan.
  */
 public interface NetworkScanner {
     
