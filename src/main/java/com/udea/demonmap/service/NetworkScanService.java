@@ -15,7 +15,7 @@ public interface NetworkScanService {
     /**
      * Realiza un escaneo completo de la red con detección de dispositivos y puertos.
      *
-     * @param networkRange Rango de red en notación CIDR (ej: 192.168.1.0/24)
+     * @param networkRange Rango de red  (ej: 192.168.1.0/24)
      * @return ScanResult con todos los dispositivos y sus puertos
      * @throws ScanException si hay un error durante el escaneo
      */
@@ -24,7 +24,7 @@ public interface NetworkScanService {
     /**
      * Realiza un escaneo rápido de la red (solo detecta dispositivos activos).
      * 
-     * @param networkRange Rango de red en notación CIDR
+     * @param networkRange Rango de red
      * @return ScanResult con dispositivos activos sin detalle de puertos
      * @throws ScanException si hay un error durante el escaneo
      */

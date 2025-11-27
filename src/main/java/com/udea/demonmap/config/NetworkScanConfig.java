@@ -23,12 +23,7 @@ import jakarta.validation.constraints.Min;
 public class NetworkScanConfig {
     
     /**
-     * Tamaño del pool de threads para escaneo concurrente.
-     * 
-     * Valores recomendados:
-     * - 10: Para CPU limitada o redes pequeñas
-     * - 20: Balanceado (default) - bueno para la mayoría
-     * - 30-50: Para servidores potentes con muchos cores
+     * Tamaño del pool de threads
      */
     @Min(value = 1, message = "Thread pool size debe ser al menos 1")
     @Max(value = 100, message = "Thread pool size no debe exceder 100")

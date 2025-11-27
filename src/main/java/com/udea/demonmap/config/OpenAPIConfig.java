@@ -21,15 +21,14 @@ public class OpenAPIConfig {
         
         Contact contact = new Contact();
         contact.setName("Demo Nmap Project");
-        contact.setEmail("demo@udea.edu.co");
+        contact.setEmail("estiven.ospinag@udea.edu.co");
         
         Info info = new Info()
                 .title("Network Scanner API")
                 .version("1.0.0")
                 .description(
                     "API REST para escaneo de redes locales usando nmap. " +
-                    "Permite detectar dispositivos activos, puertos abiertos, servicios y sistemas operativos. " +
-                    "Implementa concurrencia para escaneos eficientes y sigue principios SOLID y Clean Code."
+                    "Permite detectar dispositivos activos, puertos abiertos, servicios y sistemas operativos. "
                 )
                 .contact(contact)
                 .license(new License()

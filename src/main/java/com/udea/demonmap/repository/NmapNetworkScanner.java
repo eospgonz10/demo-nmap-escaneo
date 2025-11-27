@@ -348,7 +348,6 @@ public class NmapNetworkScanner implements NetworkScanner {
                         .build();
                 
                 deviceBuilder.openPorts(new ArrayList<>());
-                // Necesitamos construir y agregar después
             }
             
             // Detectar estado del host

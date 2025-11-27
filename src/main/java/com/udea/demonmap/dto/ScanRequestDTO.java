@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class ScanRequestDTO {
     
     /**
-     * Rango de red en notación CIDR (ej: 192.168.1.0/24)
+     * Rango de red (ej: 192.168.1.0/24)
      * Si no se proporciona, se detectará automáticamente la red local.
      */
     @Pattern(

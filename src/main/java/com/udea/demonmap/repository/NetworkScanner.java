@@ -13,7 +13,7 @@ public interface NetworkScanner {
     /**
      * Escanea un rango de red para detectar dispositivos activos.
      * 
-     * @param networkRange Rango de red en notación CIDR (ej: 192.168.1.0/24)
+     * @param networkRange Rango de red (ej: 192.168.1.0/24)
      * @return ScanResult con los dispositivos encontrados
      * @throws ScanException si hay un error durante el escaneo
      */

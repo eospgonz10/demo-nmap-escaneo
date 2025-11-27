@@ -43,8 +43,7 @@ public class NetworkScanController {
     
     @Operation(
         summary = "Escanear red completa",
-        description = "Realiza un escaneo de la red detectando dispositivos activos y sus puertos abiertos. " +
-                     "Usa concurrencia para mejorar el rendimiento del escaneo."
+        description = "Realiza un escaneo de la red detectando dispositivos activos y sus puertos abiertos. "
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -63,7 +62,7 @@ public class NetworkScanController {
     })
     @GetMapping("/scan")
     public ResponseEntity<ScanResultDTO> scanNetwork(
-            @Parameter(description = "Rango de red en notación CIDR (ej: 192.168.1.0/24). Si no se proporciona, se detecta automáticamente.", example = "192.168.1.0/24")
+            @Parameter(description = "Rango de red (ej: 192.168.1.0/24). Si no se proporciona, se detecta automáticamente.", example = "192.168.1.0/24")
             @RequestParam(required = false) 
             String networkRange,
             

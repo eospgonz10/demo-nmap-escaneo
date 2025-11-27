@@ -7,9 +7,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 /**
- * Configuración de CORS (Cross-Origin Resource Sharing).
- * 
- * Permite que la API sea consumida desde cualquier origen (frontend en diferentes dominios/puertos).
+ * Configuración de CORS
  */
 @Configuration
 public class CorsConfig {
@@ -19,7 +17,7 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // Permitir credenciales (cookies, authorization headers, etc.)
+        // Permitir credenciales
         config.setAllowCredentials(true);
         
         // Permitir todos los orígenes
